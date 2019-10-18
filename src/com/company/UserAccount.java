@@ -1,6 +1,7 @@
 package com.company;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -46,7 +47,7 @@ public class UserAccount {
         }
     }
 
-    public static String signIn() throws IOException{
+    public static String signIn() throws IOException {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Введите имя:");
         String name = scanner.nextLine();
@@ -80,6 +81,7 @@ public class UserAccount {
             throw e;
         }
     }
+
     public static void createChat(ChatRoom chatRoom) throws IOException {
         try {
             URL url = new URL(Utils.getURL() + "/addChat");
@@ -107,12 +109,102 @@ public class UserAccount {
             throw e;
         }
     }
-    public static String selectChatRoom(List<ChatRoom> list, String chatRoom) throws IOException {
-        for(ChatRoom chat: list){
-            if(chat.getName().equals(chatRoom)){
+
+    public static String selectChatRoom(List<ChatRoom> list) throws IOException {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Введите название комнаты:");
+        String chatRoom = scanner.nextLine();
+        System.out.println("Введите парль комнаты:");
+        String pass = scanner.nextLine();
+        ChatRoom chatRoomTwo = new ChatRoom(chatRoom, pass);
+        for (ChatRoom chat : list) {
+            if (chat.equals(chatRoomTwo)) {
                 return chatRoom;
             }
         }
+        System.out.println("Неверно выбрана комната или введён неправильный пароль!");
         throw new IOException();
+    }
+
+    public static void showUsers(List<User> users, String login) {
+        for (User user : users) {
+            if (!user.getName().equals(login)) {
+                System.out.println(user.getName() + " status:" + user.getStatus());
+            }
+        }
+    }
+
+    public static void showChatRooms(List<ChatRoom> chatRooms) {
+        for (ChatRoom room : chatRooms) {
+            System.out.println(room.getName());
+        }
+    }
+
+    public static boolean checkNameUser(List<User> users, String name, String myLogin) {
+        for (User user : users) {
+            if ((!user.getName().equals(myLogin) && (user.getName().equals(name)))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static List<ChatRoom> getListChatRoom() {
+        Gson gson = new Gson();
+        try {
+            URL url = new URL(Utils.getURL() + "/getChat");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            try (InputStream is = connection.getInputStream()) {
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                byte[] bytes = new byte[10240];
+                int len;
+                while ((len = is.read(bytes)) > 0) {
+                    bos.write(bytes, 0, len);
+                }
+                return gson.fromJson(bos.toString(), new TypeToken<List<ChatRoom>>() {
+                }.getType());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static List<User> getListUsers(String login) {
+        Gson gson = new Gson();
+        try {
+            URL url = new URL(Utils.getURL() + "/getUsers?user=" + login);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            try (InputStream is = connection.getInputStream()) {
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                byte[] bytes = new byte[10240];
+                int len;
+                while ((len = is.read(bytes)) > 0) {
+                    bos.write(bytes, 0, len);
+                }
+                return gson.fromJson(bos.toString(), new TypeToken<List<User>>() {
+                }.getType());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static String selectRegistOrSignIn() throws IOException {
+        String login;
+        while (true) {
+            Scanner scn = new Scanner(System.in);
+            login = scn.nextLine();
+            if (login.equals("1")) {
+                login = UserAccount.authorization();
+                break;
+            }
+            if (login.equals("2")) {
+                login = UserAccount.signIn();
+                break;
+            }
+        }
+        return login;
     }
 }

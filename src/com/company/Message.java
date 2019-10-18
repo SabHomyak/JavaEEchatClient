@@ -11,80 +11,80 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 public class Message {
-	private Date date = new Date();
-	private String from;
-	private String to;
-	private String text;
+    private Date date = new Date();
+    private String from;
+    private String to;
+    private String text;
 
-	public Message(String from, String text) {
-		this.from = from;
-		this.text = text;
-	}
+    public Message(String from, String text) {
+        this.from = from;
+        this.text = text;
+    }
 
-	public String toJSON() {
-		Gson gson = new GsonBuilder().create();
-		return gson.toJson(this);
-	}
-	
-	public static Message fromJSON(String s) {
-		Gson gson = new GsonBuilder().create();
-		return gson.fromJson(s, Message.class);
-	}
-	
-	@Override
-	public String toString() {
-		return new StringBuilder().append("[").append(date)
-				.append(", From: ").append(from).append(", To: ").append(to)
-				.append("] ").append(text)
+    public String toJSON() {
+        Gson gson = new GsonBuilder().create();
+        return gson.toJson(this);
+    }
+
+    public static Message fromJSON(String s) {
+        Gson gson = new GsonBuilder().create();
+        return gson.fromJson(s, Message.class);
+    }
+
+    @Override
+    public String toString() {
+        return new StringBuilder().append("[").append(date)
+                .append(", From: ").append(from).append(", To: ").append(to)
+                .append("] ").append(text)
                 .toString();
-	}
+    }
 
-	public int send(String url) throws IOException {
-		URL obj = new URL(url);
-		HttpURLConnection conn = (HttpURLConnection) obj.openConnection();
-		
-		conn.setRequestMethod("POST");
-		conn.setDoOutput(true);
-	
-		OutputStream os = conn.getOutputStream();
-		try {
-			String json = toJSON();
-			os.write(json.getBytes(StandardCharsets.UTF_8));
-			return conn.getResponseCode();
-		} finally {
-			os.close();
-		}
-	}
-	
-	public Date getDate() {
-		return date;
-	}
+    public int send(String url) throws IOException {
+        URL obj = new URL(url);
+        HttpURLConnection conn = (HttpURLConnection) obj.openConnection();
 
-	public void setDate(Date date) {
-		this.date = date;
-	}
+        conn.setRequestMethod("POST");
+        conn.setDoOutput(true);
 
-	public String getFrom() {
-		return from;
-	}
+        OutputStream os = conn.getOutputStream();
+        try {
+            String json = toJSON();
+            os.write(json.getBytes(StandardCharsets.UTF_8));
+            return conn.getResponseCode();
+        } finally {
+            os.close();
+        }
+    }
 
-	public void setFrom(String from) {
-		this.from = from;
-	}
+    public Date getDate() {
+        return date;
+    }
 
-	public String getTo() {
-		return to;
-	}
+    public void setDate(Date date) {
+        this.date = date;
+    }
 
-	public void setTo(String to) {
-		this.to = to;
-	}
+    public String getFrom() {
+        return from;
+    }
 
-	public String getText() {
-		return text;
-	}
+    public void setFrom(String from) {
+        this.from = from;
+    }
 
-	public void setText(String text) {
-		this.text = text;
-	}
+    public String getTo() {
+        return to;
+    }
+
+    public void setTo(String to) {
+        this.to = to;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
 }

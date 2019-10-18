@@ -42,8 +42,8 @@ public class ChatRoom {
         this.users = users;
     }
 
-    public void addUserToChat(String user){
-        if(users.contains(user)){
+    public void addUserToChat(String user) {
+        if (users.contains(user)) {
             System.out.println("Пользователь уже добавлен в комнату!");
         } else {
             users.add(user);

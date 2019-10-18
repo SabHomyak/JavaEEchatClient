@@ -14,6 +14,7 @@ public class GetThread implements Runnable {
     private final Gson gson;
     private int n;
     private String name;
+    private String chatRoom;
 
     public GetThread(String name) {
         gson = new GsonBuilder().create();
@@ -24,7 +25,7 @@ public class GetThread implements Runnable {
     public void run() {
         try {
             while (!Thread.interrupted()) {
-                URL url = new URL(Utils.getURL() + "/get?from=" + n +"&user="+name);
+                URL url = new URL(Utils.getURL() + "/get?from=" + n + "&user=" + name);
                 HttpURLConnection http = (HttpURLConnection) url.openConnection();
 
                 InputStream is = http.getInputStream();
@@ -36,6 +37,9 @@ public class GetThread implements Runnable {
                     if (list != null) {
                         for (Message m : list.getList()) {
                             if (m.getTo().contains(name) || m.getFrom().equals(name)) {
+                                System.out.println(m);
+                            }
+                            if (m.getTo().equals(chatRoom) && !m.getFrom().equals(name)) {
                                 System.out.println(m);
                             }
                             n++;
@@ -52,6 +56,14 @@ public class GetThread implements Runnable {
         }
     }
 
+    public String getChatRoom() {
+        return chatRoom;
+    }
+
+    public void setChatRoom(String chatRoom) {
+        this.chatRoom = chatRoom;
+    }
+
     private byte[] requestBodyToArray(InputStream is) throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         byte[] buf = new byte[10240];
@@ -64,4 +76,5 @@ public class GetThread implements Runnable {
 
         return bos.toByteArray();
     }
+
 }
