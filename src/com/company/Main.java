@@ -31,17 +31,45 @@ public class Main {
                 }
             }
             List<User> users = getListUsers(login);
-
+            List<ChatRoom> chatRooms = getListChatRoom();
             if (users.size() != 1) {
-                System.out.println("Выберите собеседника:");
+                System.out.println("Для выбора собеседника нажмите 1:");
                 for (User user : users) {
                     if (!user.getName().equals(login)) {
                         System.out.println(user.getName() + " status:" + user.getStatus());
                     }
                 }
+                System.out.println("Для выбора комнаты нажмите 2:");
+                for (ChatRoom room : chatRooms) {
+                    System.out.println(room.getName());
+                }
+                System.out.println("Для создание чат-комнаты нажмите 3");
                 Scanner scan = new Scanner(System.in);
                 interlocutor = scan.nextLine();
-                if (!checkNameUser(users, interlocutor, login)) {
+                if (interlocutor.equals("3")) {
+                    System.out.println("Введите название комнаты:");
+                    String name = scan.nextLine();
+                    System.out.println("Введите пароль комнаты:");
+                    String pass = scan.nextLine();
+                    ChatRoom chatRoom = new ChatRoom(name, pass);
+                    interlocutor = chatRoom.getName();
+                    System.out.println("Добавьте пользователей в комнату:");
+                    while (true) {
+                        scan = new Scanner(System.in);
+                        String user = scan.nextLine();
+                        if (user.equals("stop")) {
+                            break;
+                        }
+                        if (!checkNameUser(users, user, login)) {
+                            System.out.println("Неверно выбран собеседник!");
+                            throw new IOException();
+                        }
+                        chatRoom.addUserToChat(user);
+                        System.out.println("Чтобы завершить добавление напишите команду 'stop'");
+                    }
+                    System.out.println(Arrays.toString(chatRoom.getUsers().toArray()));
+                    UserAccount.createChat(chatRoom);
+                } else if (!checkNameUser(users, interlocutor, login)) {
                     System.out.println("Неверно выбран собеседник!");
                     throw new IOException();
                 }
@@ -84,6 +112,26 @@ public class Main {
                     bos.write(bytes, 0, len);
                 }
                 return gson.fromJson(bos.toString(), new TypeToken<List<User>>() {
+                }.getType());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    public static List<ChatRoom> getListChatRoom(){
+        Gson gson = new Gson();
+        try {
+            URL url = new URL(Utils.getURL() + "/getChat");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            try (InputStream is = connection.getInputStream()) {
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                byte[] bytes = new byte[10240];
+                int len;
+                while ((len = is.read(bytes)) > 0) {
+                    bos.write(bytes, 0, len);
+                }
+                return gson.fromJson(bos.toString(), new TypeToken<List<ChatRoom>>() {
                 }.getType());
             }
         } catch (IOException e) {
